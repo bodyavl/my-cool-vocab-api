@@ -13,4 +13,4 @@ export class Word {
     translation: string
 }
 
-const WordSchema = SchemaFactory.createForClass(Word);
+export const WordSchema = SchemaFactory.createForClass(Word);
