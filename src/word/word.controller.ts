@@ -2,34 +2,36 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { WordService } from './word.service';
 import { CreateWordDto } from './dto/create-word.dto';
 import { UpdateWordDto } from './dto/update-word.dto';
+import { AccessTokenGuard } from '../auth/guard';
+import { GetUser } from '../auth/decorators';
 
-
+@UseGuards(AccessTokenGuard)
 @Controller('word')
 export class WordController {
   constructor(private readonly wordService: WordService) {}
 
   @Post()
-  create(@Body() createWordDto: CreateWordDto) {
-    return this.wordService.create(createWordDto);
+  create(@GetUser('id') userId: string, @Body() createWordDto: CreateWordDto) {
+    return this.wordService.create(userId, createWordDto);
   }
 
   @Get()
-  findAll() {
-    return this.wordService.findAll();
+  findAll(@GetUser('id') userId: string) {
+    return this.wordService.findAll(userId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wordService.findOne(+id);
+  findOne(@GetUser('id') userId: string, @Param('id') id: string) {
+    return this.wordService.findOne(userId, id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWordDto: UpdateWordDto) {
-    return this.wordService.update(+id, updateWordDto);
+  update(@GetUser('id') userId: string, @Param('id') id: string, @Body() dto: UpdateWordDto) {
+    return this.wordService.update(userId, id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wordService.remove(+id);
+  remove(@GetUser('id') userId: string, @Param('id') id: string) {
+    return this.wordService.remove(userId, id);
   }
 }

@@ -7,26 +7,50 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class WordService {
+  constructor(
+    @InjectModel(Word.name) private readonly wordModel: Model<Word>,
+  ) {}
 
-  constructor(@InjectModel(Word.name) private readonly wordModel: Model<Word>) {}
-
-  async create(dto: CreateWordDto) {
-    return 'This action adds a new word';
+  async create(userId: string, dto: CreateWordDto): Promise<Word> {
+    const word = await this.wordModel.create({
+      user: userId,
+      ...dto,
+    });
+    return word;
   }
 
-  findAll() {
-    return `This action returns all word`;
+  async findAll(userId: string): Promise<Word[]> {
+    const words = await this.wordModel.find({ user: userId });
+    return words;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} word`;
+  async findOne(userId: string, id: string): Promise<Word> {
+    const word = await this.wordModel.findOne({
+      _id: id,
+      user: userId,
+    });
+    return word;
   }
 
-  update(id: number, updateWordDto: UpdateWordDto) {
-    return `This action updates a #${id} word`;
+  async update(userId: string, id: string, dto: UpdateWordDto): Promise<Word> {
+    const word = await this.wordModel.findOneAndUpdate(
+      {
+        _id: id,
+        user: userId,
+      },
+      {
+        ...dto,
+      },
+      { new: true },
+    );
+    return word;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} word`;
+  async remove(userId: string, id: string): Promise<Word> {
+    const word = await this.wordModel.findOneAndDelete({
+      _id: id,
+      user: userId
+    })
+    return word;
   }
 }
