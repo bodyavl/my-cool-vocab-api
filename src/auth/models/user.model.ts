@@ -1,4 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
+import { Word } from '../../word/models/word.model';
 
 @Schema()
 export class User {
@@ -10,6 +12,9 @@ export class User {
 
   @Prop([String])
   refresh_tokens: string[];
+
+  @Prop({type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Word'}]})
+  words: Word[]
 
 }
 

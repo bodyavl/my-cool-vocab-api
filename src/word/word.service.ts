@@ -9,8 +9,8 @@ import { Model } from 'mongoose';
 export class WordService {
 
   constructor(@InjectModel(Word.name) private readonly wordModel: Model<Word>) {}
-  
-  create(createWordDto: CreateWordDto) {
+
+  async create(dto: CreateWordDto) {
     return 'This action adds a new word';
   }
 
