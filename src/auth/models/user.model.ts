@@ -7,11 +7,20 @@ export class User {
   @Prop({ unique: true, required: true })
   email: string;
 
-  @Prop({ required: true })
-  hash: string;
+  @Prop()
+  firstName: string
+
+  @Prop()
+  lastName: string
+
+  @Prop()
+  picture: string
+
+  @Prop()
+  hash?: string
 
   @Prop([String])
-  refresh_tokens: string[];
+  refresh_tokens: string[]
 
   @Prop({type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Word'}]})
   words: Word[]

@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { Admin } from '../models/admin.model';
+
 import { Model } from 'mongoose';
+import { User } from '../models';
 
 @Injectable()
 export class AccessTokenJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(@InjectModel(Admin.name) private readonly adminModel: Model<Admin>) {
+  constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -15,9 +16,9 @@ export class AccessTokenJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: { sub: string; login: string }) {
-    const admin = await this.adminModel.findById(payload.sub);
-    delete admin.hash;
-    return admin;
+  async validate(payload: { sub: string; email: string }) {
+    const user = await this.userModel.findById(payload.sub);
+    delete user.hash;
+    return user;
   }
 }

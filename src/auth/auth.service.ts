@@ -1,10 +1,15 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AuthDto } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { User } from './models/user.model';
+import { IUser } from './interfaces';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +17,33 @@ export class AuthService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
     private jwt: JwtService,
   ) {}
+
+  async googleLogin(user: IUser) {
+    try {
+      if (!user) {
+        throw new UnauthorizedException();
+      }
+
+      const existingUser = await this.userModel.findOne({
+        email: user.email,
+      });
+
+      if (existingUser) {
+        return existingUser;
+      }
+
+      const newUser = await this.userModel.create({
+        ...user,
+      });
+
+      const tokens = await this.signTokens(newUser.id, newUser.email);
+      await this.updateRefreshToken(newUser.id, tokens.refresh_token);
+
+      return tokens;
+    } catch (error) {
+      throw error;
+    }
+  }
 
   async signup(dto: AuthDto) {
     const hash = await argon.hash(dto.password);
@@ -36,7 +68,7 @@ export class AuthService {
       const user = await this.userModel.findOne({ email: dto.email });
       if (!user) throw new ForbiddenException('Credentials incorrect');
       const isMatch = await argon.verify(user.hash, dto.password);
-      if (!isMatch) throw new ForbiddenException('Wrong password');
+      if (!isMatch) throw new ForbiddenException('Credentials incorrect');
       const tokens = await this.signTokens(user.id, user.email);
       await this.updateRefreshToken(user.id, tokens.refresh_token);
       return { ...tokens };
@@ -86,7 +118,7 @@ export class AuthService {
 
   async updateRefreshToken(id: string, refresh_token: string) {
     await this.userModel.findByIdAndUpdate(id, {
-      $push: {refresh_tokens: refresh_token},
+      $push: { refresh_tokens: refresh_token },
     });
   }
 }
