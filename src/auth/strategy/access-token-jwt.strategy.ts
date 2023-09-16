@@ -1,23 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-
-import { Model } from 'mongoose';
-import { User } from '../models';
+import { UserService } from '../../user/user.service';
+import { ConfigService } from '@nestjs/config';
+import { AllConfigType } from '../../config/config.types';
 
 @Injectable()
 export class AccessTokenJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {
+  constructor(
+    private userService: UserService,
+    private configService: ConfigService<AllConfigType>,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.ACCESS_TOKEN_SECRET,
+      secretOrKey: configService.getOrThrow('auth.secret', { infer: true }),
     });
   }
 
   async validate(payload: { sub: string; email: string }) {
-    const user = await this.userModel.findById(payload.sub);
+    const user = await this.userService.findById(payload.sub);
     delete user.hash;
     return user;
   }

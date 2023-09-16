@@ -1,18 +1,17 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose from "mongoose";
-import { User } from "../../auth/models";
-
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
+import { User } from '../../user/models';
 
 @Schema()
 export class Word {
-    @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User'})
-    user: User
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  user: User;
 
-    @Prop()
-    source_word: string
+  @Prop()
+  source_word: string;
 
-    @Prop()
-    translation: string
+  @Prop()
+  translation: string;
 }
 
 export const WordSchema = SchemaFactory.createForClass(Word);
